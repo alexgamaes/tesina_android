@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import com.couchbase.lite.BasicAuthenticator;
+import com.couchbase.lite.CouchbaseLite;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.DataSource;
 import com.couchbase.lite.Database;
@@ -148,7 +149,8 @@ public class MainActivity extends AppCompatPreferenceActivity {
 
     private void InitDatabase() {
         // Get the database (and create it if it doesn’t exist).
-        DatabaseConfiguration config = new DatabaseConfiguration(getApplicationContext());
+        CouchbaseLite.init(getApplicationContext());
+        DatabaseConfiguration config = new DatabaseConfiguration();
         Database database = null;
         try {
             database = new Database("mydb", config);
@@ -159,7 +161,7 @@ public class MainActivity extends AppCompatPreferenceActivity {
 
         // Create a new document (i.e. a record) in the database.
         MutableDocument mutableDoc = new MutableDocument()
-                .setFloat("version", 2.1F)
+                .setFloat("version", 2.25F)
                 .setString("type", "SDK");
 
         // Save it to the database.
@@ -172,7 +174,7 @@ public class MainActivity extends AppCompatPreferenceActivity {
 
         // Update a document.
         mutableDoc = database.getDocument(mutableDoc.getId()).toMutable();
-        mutableDoc.setString("language", "Java");
+        mutableDoc.setString("language", "TOTOT");
         try {
             database.save(mutableDoc);
         } catch (CouchbaseLiteException e) {

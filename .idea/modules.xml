@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Tesina.iml" filepath="$PROJECT_DIR$/Tesina.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/couchbase-lite-android-2.6.0-SNAPSHOT-debug/couchbase-lite-android-2.6.0-SNAPSHOT-debug.iml" filepath="$PROJECT_DIR$/couchbase-lite-android-2.6.0-SNAPSHOT-debug/couchbase-lite-android-2.6.0-SNAPSHOT-debug.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tesina_android.iml" filepath="$PROJECT_DIR$/tesina_android.iml" />
     </modules>
   </component>
 </project>
