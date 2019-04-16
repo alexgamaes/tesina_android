@@ -32,6 +32,9 @@ import java.util.List;
 public class TestActivity extends AppCompatActivity {
     private final String TAG = "TestActivity";
 
+    private final String URL_SERVER = "ws://165.22.134.21:4984/tesinadb";
+    private final String USERNAME = "sync_gateway";
+    private final String PASSWORD = "tesina";
 
     protected Database myDb = null;
     protected TextView timeTextView;
@@ -70,7 +73,8 @@ public class TestActivity extends AppCompatActivity {
         completeReplicationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                setButtonEnabledStatus(false);
+                CompleteReplication();
             }
         });
 
@@ -153,7 +157,7 @@ public class TestActivity extends AppCompatActivity {
         // Create replicators to push and pull changes to and from the cloud.
         Endpoint targetEndpoint = null;
         try {
-            targetEndpoint = new URLEndpoint(new URI("ws://165.22.134.21:4984/tesinadb"));
+            targetEndpoint = new URLEndpoint(new URI(URL_SERVER));
         } catch (URISyntaxException e) {
             e.printStackTrace();
             return;
@@ -162,7 +166,7 @@ public class TestActivity extends AppCompatActivity {
         replConfig.setReplicatorType(ReplicatorConfiguration.ReplicatorType.PUSH_AND_PULL);
 
         // Add authentication.
-        replConfig.setAuthenticator(new BasicAuthenticator("sync_gateway", "tesina"));
+        replConfig.setAuthenticator(new BasicAuthenticator(USERNAME, PASSWORD));
 
         // Create replicator.
         final Replicator replicator = new Replicator(replConfig);
@@ -192,12 +196,63 @@ public class TestActivity extends AppCompatActivity {
                     }
                 }
             }
+        });
 
+        Log.d(TAG, "InitDatabase finished ");
+
+
+        // Start replication.
+        replicator.start();
+    }
+
+    protected void CompleteReplication() {
+        // Create replicators to push and pull changes to and from the cloud.
+        Endpoint targetEndpoint = null;
+        try {
+            targetEndpoint = new URLEndpoint(new URI(URL_SERVER));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return;
+        }
+        ReplicatorConfiguration replConfig = new ReplicatorConfiguration(myDb, targetEndpoint);
+        replConfig.setReplicatorType(ReplicatorConfiguration.ReplicatorType.COMPLETE);
+
+        // Add authentication.
+        replConfig.setAuthenticator(new BasicAuthenticator(USERNAME, PASSWORD));
+
+        // Create replicator.
+        final Replicator replicator = new Replicator(replConfig);
+
+        // Listen to replicator change events.
+        final Database finalDatabase = myDb;
+        final long startTime = System.currentTimeMillis();
+        boolean showFirst = true;
+
+        replicator.addChangeListener(new ReplicatorChangeListener() {
             @Override
-            protected void finalize() throws Throwable {
-                super.finalize();
+            public void changed(ReplicatorChange change) {
+                if (change.getStatus().getError() != null) {
+                    Log.i(TAG, "Error code ::  " + change.getStatus().getError().getCode());
+                } else {
+                    if(change.getStatus().getActivityLevel().toString().equals("CONNECTING")) {
+                        Log.e(TAG, "SI ENTRO :C");
+                        CountAndShowRows(true);
+                    }
 
-                Log.e("ULTIMO", "FINALIZOOOO");
+                    boolean finalized = change.getStatus().getActivityLevel().toString().equals("STOPPED");
+
+                    Log.e(TAG, change.getStatus().getActivityLevel().toString());
+
+                    long diff = System.currentTimeMillis() - startTime;
+                    Log.e(TAG, "Time: " + System.currentTimeMillis());
+
+                    timeTextView.setText("Time last operation: " + diff + "ms " + change.getStatus().getProgress().toString());
+
+                    if(finalized) {
+                        CountAndShowRows(true);
+                        setButtonEnabledStatus(true);
+                    }
+                }
             }
         });
 
