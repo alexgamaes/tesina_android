@@ -142,6 +142,7 @@ public class TestActivity extends AppCompatActivity {
                     e.printStackTrace();
                     return;
                 }
+
             }
         };
 
@@ -169,6 +170,7 @@ public class TestActivity extends AppCompatActivity {
         // Listen to replicator change events.
         final Database finalDatabase = myDb;
         final long startTime = System.currentTimeMillis();
+
         replicator.addChangeListener(new ReplicatorChangeListener() {
             @Override
             public void changed(ReplicatorChange change) {
@@ -183,9 +185,9 @@ public class TestActivity extends AppCompatActivity {
                     Log.e(TAG, "Time: " + System.currentTimeMillis());
 
                     timeTextView.setText("Time last operation: " + diff + "ms " + change.getStatus().getProgress().toString());
-                    CountAndShowRows(finalized);
 
                     if(finalized) {
+                        CountAndShowRows(true);
                         setButtonEnabledStatus(true);
                     }
                 }
