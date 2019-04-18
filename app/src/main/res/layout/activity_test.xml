@@ -5,62 +5,146 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".TestActivity">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/textViewRows"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20dp"
-            android:text="Number of rows: "
-            tools:layout_editor_absoluteX="126dp"
-            tools:layout_editor_absoluteY="161dp" />
-
-        <TextView
-            android:id="@+id/textCheksum"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20dp"
-            android:text="Checksum: "
-            tools:layout_editor_absoluteX="126dp"
-            tools:layout_editor_absoluteY="161dp" />
-
-        <TextView
-            android:id="@+id/textViewTime"
-            android:textSize="20dp"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Time last operation: 0" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:focusableInTouchMode="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/buttonSimpleReplication"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Push and Pull Replication" />
+            <TextView
+                android:id="@+id/textViewRows"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:text="Number of rows: "
+                tools:layout_editor_absoluteX="126dp"
+                tools:layout_editor_absoluteY="161dp" />
 
-        <Button
-            android:id="@+id/buttonCompleteReplication"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Complete Replication" />
+            <TextView
+                android:id="@+id/textCheksum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:text="Checksum: "
+                tools:layout_editor_absoluteX="126dp"
+                tools:layout_editor_absoluteY="161dp" />
 
-        <Button
-            android:id="@+id/buttonDeleteDatabase"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Delete Database" />
+            <TextView
+                android:id="@+id/textViewTime"
+                android:textSize="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Time last operation: 0" />
 
-        <Button
-            android:id="@+id/buttonRecalculate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Re-calculate" />
-    </LinearLayout>
+            <Button
+                android:id="@+id/buttonSimpleReplication"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Push and Pull Replication" />
+
+            <Button
+                android:id="@+id/buttonCompleteReplication"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Complete Replication" />
+
+            <Button
+                android:id="@+id/buttonDeleteDatabase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Delete Database" />
+
+            <Button
+                android:id="@+id/buttonRecalculate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Re-calculate" />
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="32dp"
+                android:textStyle="bold"
+                android:layout_marginTop="40px"
+                android:text="Automatic test" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:textSize="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Percentage" />
+
+
+            <EditText
+                android:id="@+id/editTextPercentage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number"
+                android:text="10" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:textSize="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Delay after modification" />
+
+
+            <EditText
+                android:id="@+id/editTextModificationDelay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number"
+                android:text="50" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:textSize="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Number of test" />
+
+
+            <EditText
+                android:id="@+id/editTextTestsNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number"
+                android:text="1" />
+
+            <Button
+                android:id="@+id/buttonAutomaticTest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Run test" />
+
+            <TextView
+                android:id="@+id/textView5"
+                android:textSize="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Resultados" />
+
+            <TextView
+                android:id="@+id/editTextLogs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"/>
+
+
+        </LinearLayout>
+    </ScrollView>
 
 </android.support.constraint.ConstraintLayout>
