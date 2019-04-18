@@ -11,7 +11,7 @@ import com.couchbase.lite.ReplicatorConfiguration;
 
 
 public class CompleteAsyncTask extends ReplicationAsyncTask {
-    private final String TAG = "TestActivity";
+    private final String TAG = "Complete";
 
 
     public CompleteAsyncTask(Database db, ProgressInterface activity) {

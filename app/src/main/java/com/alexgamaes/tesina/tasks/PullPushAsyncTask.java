@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
 
 public class PullPushAsyncTask extends ReplicationAsyncTask {
-    private final String TAG = "TestActivity";
+    private final String TAG = "PullPush";
 
 
     public PullPushAsyncTask(Database db, ProgressInterface activity) {

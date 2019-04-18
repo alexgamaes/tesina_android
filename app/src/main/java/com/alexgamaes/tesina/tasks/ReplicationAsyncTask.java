@@ -20,7 +20,7 @@ import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
 
 public abstract class ReplicationAsyncTask extends AsyncTask<Void, String, Long> {
-    protected final String TAG = "TestActivity";
+    protected final String TAG = "ReplicationAsyncTask";
 
 
     protected Database m_db;

@@ -1,11 +1,15 @@
 package com.alexgamaes.tesina;
 
+import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.alexgamaes.tesina.tasks.SingleTestAsyncTask;
@@ -50,11 +54,18 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
     protected TextView checksumTextView;
     protected TextView resultLogsTextview;
 
+    protected EditText percentageEditText;
+    protected EditText modificationTimeEditText;
+    protected EditText numberOfTestEditText;
+
+
     protected Button simpleReplicationButton;
     protected Button completeReplicationButton;
     protected Button recalculateButton;
     protected Button deleteDatabaseButton;
     protected Button automaticTestButton;
+
+    protected ScrollView scroll;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,14 +74,20 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
 
         CouchbaseLite.init(getApplicationContext());
 
+        scroll = findViewById(R.id.mainScrollView);
+
         timeTextView = findViewById(R.id.textViewTime);
         rowsTextView = findViewById(R.id.textViewRows);
         checksumTextView = findViewById(R.id.textCheksum);
-
         resultLogsTextview = findViewById(R.id.editTextLogs);
 
         InitDatabase();
         CountAndShowRows(true);
+
+
+        percentageEditText = findViewById(R.id.editTextPercentage);
+        modificationTimeEditText = findViewById(R.id.editTextModificationDelay);
+        numberOfTestEditText = findViewById(R.id.editTextTestsNumber);
 
         simpleReplicationButton = findViewById(R.id.buttonSimpleReplication);
         simpleReplicationButton.setOnClickListener(new View.OnClickListener() {
@@ -115,15 +132,7 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
         automaticTestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AutomaticTestInfo automaticTestInfo
-                        = new AutomaticTestInfo(30, 1, 10);
-
-                setButtonEnabledStatus(false);
-
-                AutomaticTest automaticTest = new AutomaticTest(automaticTestInfo);
-                automaticTest.execute();
-
-
+               OnAutomaticClickButton();
             }
         });
     }
@@ -154,6 +163,7 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
             public void run() {
                 Long[] ans = Utils.CountRows(myDb, doChecksum);
                 rowsTextView.setText("Number of rows:" + ans[0]);
+
                 if (ans[1] != -1) {
                     checksumTextView.setText("Checksum: " + ans[1]);
                 }
@@ -283,30 +293,111 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
         }
     }
 
-    @Override
-    public void showProgress(String rowNumber, String checksum, String progress) {
-        if (rowNumber != null) {
-            rowsTextView.setText("Number of rows:" + rowNumber);
+    protected void OnAutomaticClickButton() {
+        AutomaticTestInfo automaticTestInfo = new AutomaticTestInfo();
+
+        // Get percentage and validate it
+        automaticTestInfo.percentage = Integer.parseInt(percentageEditText.getText().toString());
+        if(automaticTestInfo.percentage < 0 || automaticTestInfo.percentage > 100) {
+            AlertDialog alertDialog = new AlertDialog.Builder(TestActivity.this).create();
+            alertDialog.setTitle("Error");
+            alertDialog.setMessage("The percentage must be between 0 and 100");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+
+            return;
         }
 
-        if (checksum != null) {
-            checksumTextView.setText("Checksum: " + checksum);
+        // Get percentage and validate it
+        automaticTestInfo.numberOfTests = Integer.parseInt(numberOfTestEditText.getText().toString());
+        if(automaticTestInfo.numberOfTests < 1 || automaticTestInfo.numberOfTests > 5) {
+            AlertDialog alertDialog = new AlertDialog.Builder(TestActivity.this).create();
+            alertDialog.setTitle("Error");
+            alertDialog.setMessage("The number of test must be between 1 and 5");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+            return;
         }
 
-        if (progress != null) {
-            timeTextView.setText("Time last operation: " + progress);
 
+        // Get percentage and validate it
+        automaticTestInfo.modificationDelay = Integer.parseInt(modificationTimeEditText.getText().toString());
+        if(automaticTestInfo.modificationDelay < 5 ) {
+            AlertDialog alertDialog = new AlertDialog.Builder(TestActivity.this).create();
+            alertDialog.setTitle("Error");
+            alertDialog.setMessage("The percentage modification delay should be greater or equal than 5");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+            return;
         }
+
+
+
+        Long[] ans = Utils.CountRows(myDb, false);
+        automaticTestInfo.databaseSize = ans[0];
+
+        setButtonEnabledStatus(false);
+
+        AutomaticTest automaticTest = new AutomaticTest(automaticTestInfo);
+        automaticTest.execute();
+
     }
 
     @Override
-    public void addResult(String result) {
-        Date dt = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String currentTime = sdf.format(dt);
+    public void showProgress(final String rowNumber, final String checksum, final String progress) {
+        runOnUiThread(new Runnable(){
+            public void run() {
 
-        String info = String.format("\n[%s] %s", currentTime, result);
-        resultLogsTextview.setText(resultLogsTextview.getText() + info);
+                if (rowNumber != null) {
+                    rowsTextView.setText("Number of rows:" + rowNumber);
+                }
+
+                if (checksum != null) {
+                    checksumTextView.setText("Checksum: " + checksum);
+                }
+
+                if (progress != null) {
+                    timeTextView.setText("Time last operation: " + progress);
+
+                }
+
+                scroll.scrollTo(0, scroll.getBottom());
+            }
+
+        });
+
+    }
+
+    @Override
+    public void addResult(final String result) {
+
+        runOnUiThread(new Runnable(){
+            public void run() {
+                Date dt = new Date();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String currentTime = sdf.format(dt);
+
+                String info = String.format("\n[%s] %s", currentTime, result);
+                resultLogsTextview.setText(resultLogsTextview.getText() + info);
+
+                scroll.scrollTo(0, scroll.getBottom());
+            }
+        });
 
     }
 
@@ -325,17 +416,32 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
         protected Long doInBackground(Void... voids) {
 
             for (int i = 0; i < info.numberOfTests; i++) {
-                publishProgress("Init", Integer.toString(i), "PUSH_AND_PULL");
-
-                SingleTestAsyncTask singleTestAsyncTask =
-                        new SingleTestAsyncTask(
-                                myDb,
-                                TestActivity.this,
-                                info,
-                                ReplicatorConfiguration.ReplicatorType.PUSH_AND_PULL);
-
                 try {
-                    singleTestAsyncTask.execute(Integer.toString(i), "PUSH_AND_PULL").get();
+                    publishProgress("Init", Integer.toString(i), "PUSH_AND_PULL", "");
+
+                    SingleTestAsyncTask singleTestAsyncTask =
+                            new SingleTestAsyncTask(
+                                    myDb,
+                                    TestActivity.this,
+                                    info,
+                                    ReplicatorConfiguration.ReplicatorType.PUSH_AND_PULL);
+
+                    singleTestAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Integer.toString(i), "PUSH_AND_PULL").get();
+                    publishProgress("Finish", Integer.toString(i), "PUSH_AND_PULL", "\n");
+
+                    // Now it's complete replication
+                    publishProgress("Init", Integer.toString(i), "COMPLETE", "");
+
+                    SingleTestAsyncTask singleCompleteTestAsyncTask =
+                            new SingleTestAsyncTask(
+                                    myDb,
+                                    TestActivity.this,
+                                    info,
+                                    ReplicatorConfiguration.ReplicatorType.COMPLETE);
+
+                    singleCompleteTestAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Integer.toString(i), "COMPLETE").get();
+                    publishProgress("Finish", Integer.toString(i), "PUSH_AND_PULL", "\n");
+
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                     return -1L;
@@ -344,16 +450,16 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
                     return -2L;
                 }
 
-                publishProgress("Finish", Integer.toString(i), "PUSH_AND_PULL");
+
 
             }
 
-            return null;
+            return 0L;
         }
 
         @Override
-        protected void onProgressUpdate(String... progress) {
-            String info = String.format("%s next test (%s:%s)", progress[0], progress[1], progress[2]);
+        protected void onProgressUpdate(final String... progress) {
+            String info = String.format("%s test (%s:%s) %s", progress[0], progress[1], progress[2], progress[3]);
 
             TestActivity.this.addResult(info);
         }

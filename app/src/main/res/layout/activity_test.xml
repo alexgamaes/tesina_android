@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".TestActivity">
     <ScrollView
+        android:id="@+id/mainScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -124,12 +125,6 @@
                 android:inputType="number"
                 android:text="1" />
 
-            <Button
-                android:id="@+id/buttonAutomaticTest"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Run test" />
-
             <TextView
                 android:id="@+id/textView5"
                 android:textSize="20dp"
@@ -142,6 +137,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"/>
+
+            <Button
+                android:id="@+id/buttonAutomaticTest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Run test"
+                android:focusable="true"/>
 
 
         </LinearLayout>
