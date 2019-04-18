@@ -14,4 +14,14 @@ public class AutomaticTestInfo {
     }
 
     public AutomaticTestInfo() {}
+
+    @Override
+    public String toString() {
+        return "AutomaticTestInfo{" +
+                "modificationDelay=" + modificationDelay +
+                ", numberOfTests=" + numberOfTests +
+                ", percentage=" + percentage +
+                ", databaseSize=" + databaseSize +
+                '}';
+    }
 }

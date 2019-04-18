@@ -1,7 +1,10 @@
 package com.alexgamaes.tesina;
 
+import android.Manifest;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alexgamaes.tesina.tasks.SingleTestAsyncTask;
 import com.couchbase.lite.BasicAuthenticator;
@@ -31,6 +35,11 @@ import com.couchbase.lite.ResultSet;
 import com.couchbase.lite.SelectResult;
 import com.couchbase.lite.URLEndpoint;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
@@ -57,6 +66,7 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
     protected EditText percentageEditText;
     protected EditText modificationTimeEditText;
     protected EditText numberOfTestEditText;
+    protected EditText auxEditText;
 
 
     protected Button simpleReplicationButton;
@@ -88,6 +98,7 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
         percentageEditText = findViewById(R.id.editTextPercentage);
         modificationTimeEditText = findViewById(R.id.editTextModificationDelay);
         numberOfTestEditText = findViewById(R.id.editTextTestsNumber);
+        auxEditText = findViewById(R.id.auxEdit);
 
         simpleReplicationButton = findViewById(R.id.buttonSimpleReplication);
         simpleReplicationButton.setOnClickListener(new View.OnClickListener() {
@@ -135,6 +146,40 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
                OnAutomaticClickButton();
             }
         });
+
+        requestStoragePermission();
+    }
+
+    protected void requestStoragePermission() {
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (shouldShowRequestPermissionRationale(
+                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                // Explain to the user why we need to read the contacts
+            }
+
+            final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 5555;
+
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+
+        }
+
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (shouldShowRequestPermissionRationale(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                // Explain to the user why we need to read the contacts
+            }
+
+            final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 5556;
+
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+
+        }
     }
 
     protected void setButtonEnabledStatus(boolean status) {
@@ -353,6 +398,12 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
 
         setButtonEnabledStatus(false);
 
+        resultLogsTextview.setText("");
+        modificationTimeEditText.clearFocus();
+        numberOfTestEditText.clearFocus();
+        percentageEditText.clearFocus();
+        auxEditText.requestFocus();
+
         AutomaticTest automaticTest = new AutomaticTest(automaticTestInfo);
         automaticTest.execute();
 
@@ -376,6 +427,7 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
 
                 }
 
+                auxEditText.requestFocus();
                 scroll.scrollTo(0, scroll.getBottom());
             }
 
@@ -395,6 +447,7 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
                 String info = String.format("\n[%s] %s", currentTime, result);
                 resultLogsTextview.setText(resultLogsTextview.getText() + info);
 
+                auxEditText.requestFocus();
                 scroll.scrollTo(0, scroll.getBottom());
             }
         });
@@ -414,10 +467,12 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
 
         @Override
         protected Long doInBackground(Void... voids) {
+            publishProgress("Start test set" , "0", info.toString(), "\n");
+
 
             for (int i = 0; i < info.numberOfTests; i++) {
                 try {
-                    publishProgress("Init", Integer.toString(i), "PUSH_AND_PULL", "");
+                    publishProgress("Init test", Integer.toString(i), "PUSH_AND_PULL", "");
 
                     SingleTestAsyncTask singleTestAsyncTask =
                             new SingleTestAsyncTask(
@@ -427,10 +482,10 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
                                     ReplicatorConfiguration.ReplicatorType.PUSH_AND_PULL);
 
                     singleTestAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Integer.toString(i), "PUSH_AND_PULL").get();
-                    publishProgress("Finish", Integer.toString(i), "PUSH_AND_PULL", "\n");
+                    publishProgress("Finish test", Integer.toString(i), "PUSH_AND_PULL", "\n");
 
                     // Now it's complete replication
-                    publishProgress("Init", Integer.toString(i), "COMPLETE", "");
+                    publishProgress("Init test", Integer.toString(i), "COMPLETE", "");
 
                     SingleTestAsyncTask singleCompleteTestAsyncTask =
                             new SingleTestAsyncTask(
@@ -440,7 +495,7 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
                                     ReplicatorConfiguration.ReplicatorType.COMPLETE);
 
                     singleCompleteTestAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Integer.toString(i), "COMPLETE").get();
-                    publishProgress("Finish", Integer.toString(i), "PUSH_AND_PULL", "\n");
+                    publishProgress("Finish test", Integer.toString(i), "PUSH_AND_PULL", "\n");
 
                 } catch (ExecutionException e) {
                     e.printStackTrace();
@@ -449,17 +504,34 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
                     e.printStackTrace();
                     return -2L;
                 }
-
-
-
             }
+
+            // Get the directory for the app's private pictures directory.
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "tesina.txt");
+
+            try {
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+
+                FileOutputStream fileOutput = new FileOutputStream(file, true);
+
+                PrintStream printstream = new PrintStream(fileOutput);
+                printstream.print(resultLogsTextview.getText() +"\n");
+                fileOutput.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
 
             return 0L;
         }
 
         @Override
         protected void onProgressUpdate(final String... progress) {
-            String info = String.format("%s test (%s:%s) %s", progress[0], progress[1], progress[2], progress[3]);
+            String info = String.format("%s (%s:%s) %s", progress[0], progress[1], progress[2], progress[3]);
 
             TestActivity.this.addResult(info);
         }
