@@ -65,7 +65,7 @@ public class SingleTestAsyncTask extends AsyncTask<String, String, Long> {
             String serverChecksum = httpView.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URL_VIEW).get();
 
             Long[] mobileChecksum = Utils.CountRows(m_db, true);
-            String checksumsInfo = String.format("Checksum: server-%s | mobile-%s", serverChecksum, Long.toString(mobileChecksum[1]));
+            String checksumsInfo = String.format("Checksum(%s): server-%s | mobile-%s", Long.toString(mobileChecksum[0]), serverChecksum, Long.toString(mobileChecksum[1]));
 
             publishProgress(strings[0], strings[1], checksumsInfo);
 

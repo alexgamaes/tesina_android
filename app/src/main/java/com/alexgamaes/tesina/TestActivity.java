@@ -50,7 +50,10 @@ import java.util.concurrent.ExecutionException;
 public class TestActivity extends AppCompatActivity implements ProgressInterface {
     private final String TAG = "TestActivity";
 
-    public final static String IP_SERVER = "142.93.110.254";
+    public final static String IP_SERVER = "142.93.110.254"; // tesina1
+    //public final static String IP_SERVER = "68.183.67.82"; // tesina2
+    //public final static String IP_SERVER = "134.209.237.167"; // tesina3
+
     public final static String URL_DB_SERVER = "ws://" + IP_SERVER + ":4984/tesinadb";
     public final static String URL_NODE_SERVER = "http://" + IP_SERVER + ":3000";
 
@@ -178,6 +181,36 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
             final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 5556;
 
             requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+
+        }
+
+        if (checkSelfPermission(Manifest.permission.INTERNET)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (shouldShowRequestPermissionRationale(
+                    Manifest.permission.INTERNET)) {
+                // Explain to the user why we need to read the contacts
+            }
+
+            final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 5557;
+
+            requestPermissions(new String[]{Manifest.permission.INTERNET}, MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+
+        }
+
+        if (checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (shouldShowRequestPermissionRationale(
+                    Manifest.permission.ACCESS_NETWORK_STATE)) {
+                // Explain to the user why we need to read the contacts
+            }
+
+            final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 5558;
+
+            requestPermissions(new String[]{Manifest.permission.ACCESS_NETWORK_STATE}, MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
 
         }
     }
@@ -360,10 +393,10 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
 
         // Get percentage and validate it
         automaticTestInfo.numberOfTests = Integer.parseInt(numberOfTestEditText.getText().toString());
-        if(automaticTestInfo.numberOfTests < 1 || automaticTestInfo.numberOfTests > 5) {
+        if(automaticTestInfo.numberOfTests < 1 || automaticTestInfo.numberOfTests > 10) {
             AlertDialog alertDialog = new AlertDialog.Builder(TestActivity.this).create();
             alertDialog.setTitle("Error");
-            alertDialog.setMessage("The number of test must be between 1 and 5");
+            alertDialog.setMessage("The number of test must be between 1 and 10");
             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -506,24 +539,44 @@ public class TestActivity extends AppCompatActivity implements ProgressInterface
                 }
             }
 
-            // Get the directory for the app's private pictures directory.
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "tesina.txt");
+            // Get the directory for the app's private download directory.
+            runOnUiThread(new Runnable() {
+                public void run() {
 
-            try {
-                if (!file.exists()) {
-                    file.createNewFile();
+                    try {
+                        File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "tesin");
+                        Log.e(TAG, "DIRECTORY");
+                        if (!directory.exists()) {
+                            directory.mkdir();
+                        }
+
+                        File file = new File(directory, "tesina.txt");
+
+                        if (!file.exists()) {
+                            file.createNewFile();
+                        }
+                        Log.e(TAG, "FILEEE");
+
+                        FileOutputStream fileOutput = new FileOutputStream(file, true);
+
+                        PrintStream printstream = new PrintStream(fileOutput);
+                        printstream.print(resultLogsTextview.getText() + "\n");
+
+                        printstream.close();
+
+                        fileOutput.flush();
+                        fileOutput.close();
+
+
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "FILEEE 4");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "FILEEE 3");
+                    }
                 }
-
-                FileOutputStream fileOutput = new FileOutputStream(file, true);
-
-                PrintStream printstream = new PrintStream(fileOutput);
-                printstream.print(resultLogsTextview.getText() +"\n");
-                fileOutput.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            });
 
 
             return 0L;
